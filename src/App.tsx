@@ -15,21 +15,16 @@ import DeleteIcon from "@material-ui/icons/Delete";
 // Other Imports
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "./redux/store";
-import { addTodo, removeTodo, setTodoStatus, removeAllTodo } from "./redux/todoSlice";
+import { addTodo, removeTodo, removeAllTodo } from "./redux/todoSlice";
 
 function App() {
 	//React Hooks
 	const [todoDescription, setTodoDescription] = useState("");
 
 	//React Redux Hooks
-	//@ts-ignore
-	let getTasks = JSON.parse(localStorage.getItem('ToDoTask'))
-	console.log("getTasks", getTasks);
-
-	const todoList = useSelector((state: RootState) => state);
+	const todoList = useSelector((state: RootState) => state.todos.allTodos);
 
 	const dispatch = useDispatch<AppDispatch>();
-	console.table(todoList);
 	//Rendering
 	return (
 		<Container maxWidth="xs">
@@ -65,44 +60,29 @@ function App() {
 				<DeleteIcon />
 			</IconButton>
 
-			<div>
+			<List>
+				{todoList.map((todo) => (
+					<ListItem key={todo.id}>
+						<ListItemText
+							style={{
+								textDecoration: todo.completed ? "line-through" : "none",
+							}}
+						>
+							{todo.description}
+						</ListItemText>
+						<ListItemSecondaryAction>
+							<IconButton
+								onClick={() => {
+									dispatch(removeTodo(todo.id));
+								}}
+							>
+								<DeleteIcon />
+							</IconButton>
 
-
-				<div>
-					{
-						todoList.map((todo: any) => (
-							<ListItem key={todo.id}>
-								<ListItemText
-									style={{
-										textDecoration: todo.completed ? "line-through" : "none",
-									}}
-								>
-									{todo.description}
-								</ListItemText>
-								<ListItemSecondaryAction>
-									<IconButton
-										onClick={() => {
-											dispatch(removeTodo(todo.id));
-										}}
-									>
-										<DeleteIcon />
-									</IconButton>
-									<Checkbox
-										edge="end"
-										value={todo.completed}
-										onChange={() => {
-											dispatch(
-												setTodoStatus({ completed: !todo.completed, id: todo.id })
-											);
-										}}
-									/>
-								</ListItemSecondaryAction>
-							</ListItem>
-						))
-					}
-				</div>
-
-			</div>
+						</ListItemSecondaryAction>
+					</ListItem>
+				))}
+			</List>
 		</Container>
 	);
 }

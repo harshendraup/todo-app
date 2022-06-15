@@ -2,7 +2,29 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Todo } from "../models/Todo";
 import { v4 as uuidv4 } from "uuid";
 
-const initialState = [] as Todo[];
+const getTodosFromLocalStorage = () => {
+	try {
+		const todoState = localStorage.getItem("todos");
+		if (todoState) return JSON.parse(todoState);
+	} catch (e) {
+		console.log(e);
+	}
+};
+
+const todosStorage = getTodosFromLocalStorage();
+
+const todos =
+	todosStorage && todosStorage.todos && todosStorage.todos.allTodos
+		? todosStorage.todos.allTodos
+		: [];
+type initialStateType = {
+	allTodos: Todo[];
+};
+
+const todoList: Todo[] = todos;
+const initialState: initialStateType = { allTodos: todoList };
+
+//const initialState = [] as Todo[];
 
 const todoSlice = createSlice({
 	name: "todos",
@@ -10,7 +32,7 @@ const todoSlice = createSlice({
 	reducers: {
 		addTodo: {
 			reducer: (state, action: PayloadAction<Todo>) => {
-				state.push(action.payload);
+				state.allTodos.push(action.payload);
 				localStorage.setItem('ToDoTask', JSON.stringify(state))
 			},
 			prepare: (description: string) => ({
@@ -24,23 +46,14 @@ const todoSlice = createSlice({
 		removeTodo(state, action: PayloadAction<string>) {
 			console.log("state", state)
 			console.log("action", action)
-			const index = state.findIndex((todo) => todo.id === action.payload);
-			state.splice(index, 1);
+			const index = state.allTodos.findIndex((todo) => todo.id === action.payload);
+			state.allTodos.splice(index, 1);
 		},
 		removeAllTodo(state, action: PayloadAction<string>) {
-			state.length = 0;
-			localStorage.setItem('ToDoTask', JSON.stringify([]))
-
-		},
-		setTodoStatus(
-			state,
-			action: PayloadAction<{ completed: boolean; id: string }>
-		) {
-			const index = state.findIndex((todo) => todo.id === action.payload.id);
-			state[index].completed = action.payload.completed;
+			state.allTodos.length = 0;
 		},
 	},
 });
 
-export const { addTodo, removeTodo, setTodoStatus, removeAllTodo } = todoSlice.actions;
+export const { addTodo, removeTodo, removeAllTodo } = todoSlice.actions;
 export default todoSlice.reducer;
